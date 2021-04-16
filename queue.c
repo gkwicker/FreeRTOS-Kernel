@@ -2734,22 +2734,12 @@ BaseType_t xQueueIsQueueFullFromISR( const QueueHandle_t xQueue )
 
         /* See if there is an empty space in the registry.  A NULL name denotes
          * a free slot. */
-        for( ux = ( UBaseType_t ) 0U; ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE; ux++ )
+        for( ux = ( UBaseType_t ) 0U; ( ux < ( UBaseType_t ) configQUEUE_REGISTRY_SIZE ) && ( pxEntryToWrite == NULL ); ux++ )
         {
-            /* Replace an existing entry if the queue is already in the registry. */
-            if( xQueueRegistry[ ux ].xHandle == xQueue )
+            /* Replace an existing entry, or allocate a new one if this slot is available. */
+            if( ( xQueueRegistry[ ux ].xHandle == xQueue ) || ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
             {
                 pxEntryToWrite = &( xQueueRegistry[ ux ] );
-                break;
-            }
-            /* Otherwise, store in the next empty location */
-            else if( ( NULL == pxEntryToWrite ) && ( xQueueRegistry[ ux ].pcQueueName == NULL ) )
-            {
-                pxEntryToWrite = &( xQueueRegistry[ ux ] );
-            }
-            else
-            {
-                mtCOVERAGE_TEST_MARKER();
             }
         }
 
